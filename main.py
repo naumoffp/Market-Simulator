@@ -1,8 +1,5 @@
 import gui
-import time
 import tkinter as tk
-import threading
-import logging
 import merchant
 
 def main():

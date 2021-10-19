@@ -7,39 +7,41 @@ class Entity():
 
         # Tag ID onto new existence
 
+    @staticmethod
+    def _thread_runtime_factory(thread_object):
+        def thread_runtime(function):
+            def validate_thread(*args, **kwargs):
+                # self is always the first argument
+                self = args[0]
+                if self.threads[thread_object] == True:
+                    function(*args, **kwargs)
+
+            return validate_thread
+
+        return thread_runtime
+
+
+
     def make_tag(self):
         return True
 
     def start(self, function, *args, **kwargs):
-        name = function.__name__
-        thread = threading.Thread(target=self.worker, args=[name, function, *args], kwargs={**kwargs})
-        self.add_thread(function.__name__, thread)
+        thread = threading.Thread(target=function, args=[*args], kwargs={**kwargs})
+        self.add_thread(thread)
+        return thread
 
         # Fix RuntimeError: main thread is not in main loop
         thread.daemon = True
         thread.start()
 
     def stop(self, name):
-        self.threads[name][1] = False
-        return True
+        print("Killing: " + str(self.threads[name]))
+        self.threads[name].join()
 
-    def worker(self, name, function, *args, **kwargs):
-        while(self.verify_thread(name)):
-            function(*args, **kwargs)
-
-    def add_thread(self, name, thread):
-        # Format: {Name: [Thread Object, Is Running]}
-        strict_format = {name: [thread, True]}
+    def add_thread(self, thread_object):
+        # Format: {Thread Object: Is Running}
+        strict_format = {thread_object: True}
         self.threads.update(strict_format)
-        return True
-
-    def verify_thread(self, name):
-        thread_info = self.threads[name]
-
-        if thread_info[1]:
-            return True
-
-        return False
 
 
 

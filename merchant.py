@@ -3,12 +3,14 @@ import time
 import logging
 
 class Merchant(Entity):
+    thread1 = None
     def __init__(self):
         super().__init__()
-        super().start(self.buy)
+        thread1 = super().start(self.buy)
         super().start(self.sell)
         super().start(self.kill)
 
+    @Entity._thread_runtime_factory(thread1)
     def buy(self):
         while True:
             # Report time / date at 2-second intervals
@@ -26,5 +28,5 @@ class Merchant(Entity):
             logging.info(msg)
 
     def kill(self):
-        time.sleep(10)
-        self.stop(self.buy.__name__)
+        time.sleep(5)
+        super().stop(self.buy.__name__)
